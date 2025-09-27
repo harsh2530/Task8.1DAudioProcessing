@@ -1,0 +1,54 @@
+// ***************************************************************************** PYTHON CODE *************************************************************** 
+import RPi.GPIO as GPIO
+import speech_recognition as sr
+
+# -----------------------------
+# GPIO Setup
+# -----------------------------
+LED_PIN = 15   # GPIO15 (Physical pin 10)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(LED_PIN, GPIO.OUT)
+
+# -----------------------------
+# Speech Recognition Setup
+# -----------------------------
+recognizer = sr.Recognizer()
+mic = sr.Microphone()
+
+print(" Voice Controlled LED System")
+print("Say 'turn the LED on' or 'turn the LED off'")
+print("Press Ctrl+C to stop the program.")
+
+try:
+    while True:
+        print("\nListening...")
+        with mic as source:
+            audio = recognizer.listen(source)
+        print("Processing...")
+
+        try:
+            # Convert speech to text
+            text = recognizer.recognize_google(audio).lower()
+            print(f"You said: {text}")
+
+            # Check for commands
+            if "turn the led on" in text:
+                GPIO.output(LED_PIN, GPIO.HIGH)
+                print("💡 LED TURNED ON")
+            elif "turn the led off" in text:
+                GPIO.output(LED_PIN, GPIO.LOW)
+                print("💡 LED TURNED OFF")
+            else:
+                print("Command not recognized. Try again.")
+
+        except sr.UnknownValueError:
+            print("Sorry, I could not understand.")
+        except sr.RequestError as e:
+            print(f"Speech recognition service error: {e}")
+
+except KeyboardInterrupt:
+    print("\nExiting program...")
+
+finally:
+    GPIO.cleanup()
+    print("GPIO cleaned up.")
